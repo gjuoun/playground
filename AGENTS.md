@@ -1,35 +1,29 @@
 # Repository Guidelines
 
-This playground starts almost empty on purpose; every contribution should leave it more structured. Treat this document as the shared contract for expanding the codebase safely.
+## Runtime & Build Commands
+- **Install**: `cd project && bun install` (use Bun, never npm/yarn/pnpm)
+- **Run**: `cd project && bun run index.ts` or `bun --hot index.ts` for hot reload
+- **Test**: `bun test` to run all tests, `bun test <file.test.ts>` for a single test file
+- **Build**: `bun build <file.html|file.ts|file.css>` (no webpack/vite needed)
 
-## Project Structure & Module Organization
-- Keep generated tooling files isolated: `.idea/` stores JetBrains state and `.amazonq/` keeps prompt experiments; leave them alone unless you are updating tooling.
-- Place runtime code under `src/` (for example, `src/playground/example.py`), mirror tests under `tests/`, and keep throwaway spikes in `experiments/<topic>/` with a short README.
-- Store reusable shell helpers in `scripts/` and document shared fixtures in `assets/README.md`.
+## Code Style & TypeScript Guidelines
+- **Strict mode enabled**: Use explicit types, no implicit any; leverage `noUncheckedIndexedAccess`, `noImplicitOverride`
+- **Imports**: Use `.ts`/`.tsx` extensions (allowed via `allowImportingTsExtensions`); prefer named exports
+- **Formatting**: 2-space indentation, use ESNext features (target: ESNext, module: Preserve)
+- **Naming**: camelCase for variables/functions, PascalCase for types/components, kebab-case for files
+- **Error handling**: Use type-safe error returns or try-catch; avoid throwing strings
 
-## Build, Test, and Development Commands
-- `python -m venv .venv && source .venv/bin/activate`: bootstrap an isolated Python environment.
-- `pip install -e .[dev]`: install the package plus tooling; keep `pyproject.toml` in sync.
-- `make lint`: wrap `ruff check` and `ruff format --check`; add the Makefile if your feature is the first to need it.
-- `make test`: call `pytest` across `tests/` and fail fast on warnings.
-- `make run MODULE=playground.cli`: provide an explicit entry point for demos and document required arguments.
+## Bun-Specific APIs (from .cursor/rules)
+- Use `Bun.serve()` for servers (not Express), `Bun.file` over `node:fs`, `bun:sqlite` over better-sqlite3
+- Use `Bun.$\`cmd\`` for shell commands, `Bun.sql` for Postgres, `Bun.redis` for Redis
+- `.env` loads automatically (no dotenv package needed)
+- Import HTML directly in TypeScript; HTML can import `.tsx`/`.jsx` with auto-bundling
 
-## Coding Style & Naming Conventions
-- Follow PEP 8 (4-space indentation, typed public APIs, concise module docstrings).
-- Use snake_case for Python symbols, kebab-case for scripts, and UPPER_CASE for environment variables.
-- Run `ruff format src tests` before opening a PR and keep linter ignores localized in `pyproject.toml`.
+## Testing
+- Use `bun:test` framework: `import { test, expect } from "bun:test"`
+- Name test files `<module>.test.ts`, colocate with source when appropriate
+- Aim for one happy-path and one error-path test per module
 
-## Testing Guidelines
-- Write unit tests with `pytest`; prefer fixtures for expensive setup and parametrize edge cases.
-- Ensure every new module has at least one happy-path and one failure-path test; aim for ≥90 % coverage on changed files.
-- Name test files `test_<module>.py` and document complex scenarios with concise comments.
-
-## Commit & Pull Request Guidelines
-- Follow Conventional Commits (`feat: add scheduler config`, `fix: handle empty payloads`) so changelog tooling stays consistent.
-- Start each PR with a short summary, list the testing commands you ran, and link to tracked work.
-- Include screenshots or terminal recordings when you touch developer workflows, and call out follow-up work in a “Next Steps” subsection.
-
-## Security & Configuration Tips
-- Never commit credentials, tokens, or `.env` files; prefer `.env.example` with placeholders.
-- Review scripts for idempotency and gate destructive steps behind confirmation flags.
-- Document new external service dependencies in the PR description and update onboarding notes in `README.md`.
+## Security & Configuration
+- Never commit `.env` files; use `.env.example` with placeholders
+- Follow Conventional Commits for changelog consistency
