@@ -1,0 +1,13 @@
+# Ignore files with real credentials
+base/configmap.yaml
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
